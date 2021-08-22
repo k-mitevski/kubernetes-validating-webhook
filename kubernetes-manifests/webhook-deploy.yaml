@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: validation-webhook
+  labels:
+    app: validate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: validate
+  template:
+    metadata:
+      labels:
+        app: validate
+    spec:
+      containers:
+      - name: webhook
+        image: kmitevski/webhook:gunicorn
+        ports:
+        - containerPort: 443
+        env:
+        - name: LABEL
+          value: development
+        volumeMounts:
+        - name: certs-volume
+          readOnly: true
+          mountPath: "/certs"
+        imagePullPolicy: Always
+      volumes:
+      - name: certs-volume
+        secret:
+          secretName: admission-tls
